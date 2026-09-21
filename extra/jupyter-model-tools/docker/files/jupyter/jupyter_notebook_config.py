@@ -23,7 +23,7 @@ c.LanguageServerApp.language_servers = {
     },
     "vscode-json-languageserver": {
         "version": 2,
-        "argv": ["vscode-json-languageserver", "--stdio"],
+        "argv": ["json-languageserver", "--stdio"],
         "languages": ["json"],
         "mime_types": ["application/json"],
     },
