@@ -20,6 +20,22 @@ docker run --rm -v "$PWD":/work -w /work ghcr.io/cznewt/model-tools:latest kusto
 `kapitan-targets-build`, `kapitan-inventory-build`, `kapitan-doc-build`, `kluctl-project-render`,
 `version`). Companion examples: [cznewt/gitops-renderers](https://github.com/cznewt/gitops-renderers).
 
+## Jupyter overlay
+
+`ghcr.io/cznewt/jupyter-model-tools` is JupyterLab on top of the base image (bash kernel, language
+servers for Jsonnet, YAML, JSON and shell, fish terminal) with the `notebooks/` tree seeded into
+`/source/notebooks` on first start: a guided walk through Kustomize, Helm, Tanka, Kapitan, CUE and
+Timoni, secrets patterns and the cross-renderer comparison, all against the
+[gitops-renderers](https://github.com/cznewt/gitops-renderers) repository.
+
+```sh
+docker compose up            # http://localhost:8888, token in the log; ./work is persistent
+helm install lab oci://ghcr.io/cznewt/charts/jupyter-model-tools --set persistence.enabled=true
+```
+
+Layout follows monitor-tools: `extra/jupyter-model-tools/docker` (overlay image),
+`notebooks/` (baked in by CI), `charts/jupyter-model-tools` (published to `oci://ghcr.io/cznewt/charts`).
+
 ## Releasing
 
 1. Bump tool versions in `docker/versions.env`, bump `VERSION` (`YYYY.M-rN`).

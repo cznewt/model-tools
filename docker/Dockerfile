@@ -20,8 +20,10 @@ ENV PATH="/opt/venv/bin:${PATH}"
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
     python3 python3-pip python3-venv python3-dev \
-    curl build-essential unzip wget git libffi-dev ca-certificates \
+    curl build-essential unzip wget git libffi-dev ca-certificates golang-go \
     && rm -rf /var/lib/apt/lists/*
+
+# golang-go: gojsonnet has no arm64 wheel, pip builds it from source under QEMU
 
 # kapitan (python) with the go-jsonnet binding; pyyaml + markdown for the doc action
 ARG KAPITAN_VERSION

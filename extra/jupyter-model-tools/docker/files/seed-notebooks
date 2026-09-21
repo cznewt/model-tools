@@ -1,0 +1,14 @@
+#!/bin/bash
+# Entrypoint shim: seed the user-writable /source/notebooks from the read-only
+# baseline at /opt/notebooks on first start (empty or missing target). Later
+# starts keep user edits; MODEL_TOOLS_RESEED_NOTEBOOKS=force overwrites anyway.
+set -e
+BASELINE="/opt/notebooks"
+TARGET="/source/notebooks"
+if [ -d "$BASELINE" ]; then
+  mkdir -p "$TARGET"
+  if [ "${MODEL_TOOLS_RESEED_NOTEBOOKS:-}" = "force" ] || [ -z "$(ls -A "$TARGET" 2>/dev/null)" ]; then
+    cp -rT "$BASELINE" "$TARGET"
+  fi
+fi
+exec "$@"

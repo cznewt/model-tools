@@ -36,6 +36,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # The jupyter overlay bakes the repo-root notebooks/ tree into its build context.
+      - name: Stage notebooks into the jupyter build context
+        if: startsWith(inputs.APP_NAME, 'jupyter-')
+        run: |
+          if [ -d notebooks ]; then
+            mkdir -p "${APP_DIR}/files/notebooks"
+            cp -r notebooks/. "${APP_DIR}/files/notebooks/"
+          fi
+
       - name: Install cosign
         if: github.event_name != 'pull_request'
         uses: sigstore/cosign-installer@v3
@@ -61,6 +70,7 @@ jobs:
           {
             echo "ARGS<<EOF"
             if [ -f "${APP_DIR}/versions.env" ]; then sed -e 's/#.*//' -e '/^$/d' "${APP_DIR}/versions.env"; fi
+            echo "MODEL_TOOLS_VERSION=$(cat VERSION)"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 

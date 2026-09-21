@@ -10,6 +10,8 @@ on:
     branches: ["main"]
     paths:
       - docker/**
+      - extra/jupyter-model-tools/**
+      - notebooks/**
       - VERSION
       - .github/workflows/**
 
@@ -28,6 +30,20 @@ jobs:
     with:
       APP_NAME: model-tools
       APP_DIR: docker
+
+  build-jupyter-model-tools:
+    name: "Build jupyter-model-tools"
+    needs: build-model-tools
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/docker-publish.yml
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    secrets: inherit
+    with:
+      APP_NAME: jupyter-model-tools
+      APP_DIR: extra/jupyter-model-tools/docker
 
   smoke:
     name: "Smoke test"

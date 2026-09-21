@@ -1,0 +1,6 @@
+jupyterlab
+notebook
+jupyterlab-lsp
+bash_kernel
+papermill
+pyyaml

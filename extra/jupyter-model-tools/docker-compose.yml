@@ -1,0 +1,14 @@
+services:
+  jupyter-model-tools:
+    image: ghcr.io/cznewt/jupyter-model-tools:latest
+    # build:
+    #   context: ./docker
+    #   args:
+    #     MODEL_TOOLS_VERSION: latest
+    volumes:
+      - ../../notebooks:/source/notebooks
+      - ./work:/source/work
+    ports:
+      - "8888:8888"
+    # environment:
+    #   JUPYTER_PASSWORD: "argon2:..."   # output of `jupyter server password`

@@ -1,0 +1,8 @@
+services:
+  jupyter-model-tools:
+    image: ghcr.io/cznewt/jupyter-model-tools:latest
+    volumes:
+      - ./notebooks:/source/notebooks
+      - ./work:/source/work
+    ports:
+      - "8888:8888"

@@ -1,0 +1,25 @@
+image:
+  repository: ghcr.io/cznewt/jupyter-model-tools
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8888
+
+# Environment for the Jupyter container, stored in a chart-generated Secret
+# (e.g. JUPYTER_PASSWORD: the hash printed by `jupyter server password`).
+env: {}
+# Reference a pre-existing Secret instead of creating one from env.
+existingSecret: ""
+
+# Persistent /source/work (notebooks are seeded into /source/notebooks on first start).
+persistence:
+  enabled: false
+  size: 5Gi
+  storageClass: ""
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

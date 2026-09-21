@@ -1,2 +1,6 @@
 .build/
 *.tmp
+extra/jupyter-model-tools/docker/files/notebooks/*
+!extra/jupyter-model-tools/docker/files/notebooks/.gitkeep
+work/
+extra/jupyter-model-tools/work/
