@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo "Building kapitan inventory from ${SOURCE_PATH}..."
+cd ${SOURCE_PATH}; kapitan inventory

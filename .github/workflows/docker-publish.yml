@@ -1,0 +1,95 @@
+name: Docker
+
+# Reusable multi-arch build + push to ghcr.io, adapted from the dotfiles template.
+
+on:
+  workflow_call:
+    inputs:
+      APP_NAME:
+        description: "The image to publish (ghcr.io/cznewt/<APP_NAME>)"
+        default: model-tools
+        type: string
+      APP_DIR:
+        description: "The build context (holds Dockerfile and versions.env)"
+        default: docker
+        type: string
+      PLATFORMS:
+        description: "Target platforms"
+        default: linux/amd64,linux/arm64
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: cznewt/${{ inputs.APP_NAME }}
+  APP_DIR: ${{ inputs.APP_DIR }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read VERSION and build args
+        id: version
+        run: |
+          echo "VERSION=$(cat VERSION)" >> "$GITHUB_OUTPUT"
+          {
+            echo "ARGS<<EOF"
+            if [ -f "${APP_DIR}/versions.env" ]; then sed -e 's/#.*//' -e '/^$/d' "${APP_DIR}/versions.env"; fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=raw,value=${{ steps.version.outputs.VERSION }}
+
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./${{ inputs.APP_DIR }}
+          file: ./${{ inputs.APP_DIR }}/Dockerfile
+          platforms: ${{ inputs.PLATFORMS }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: ${{ steps.version.outputs.ARGS }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Sign the published Docker image
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+        run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}

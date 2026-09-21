@@ -1,0 +1,28 @@
+#!/bin/bash
+
+for tool in kapitan jsonnet jsonnetfmt jb jrsonnet tk helm kustomize kubectl kubeconform cue timoni kluctl ytt kcl sops age vals yq jq just; do
+  printf "%-12s " "$tool"
+  case "$tool" in
+    kapitan)     kapitan --version ;;
+    jsonnet)     jsonnet --version | sed 's/.*v/v/' ;;
+    jsonnetfmt)  jsonnetfmt --version | sed 's/.*v/v/' ;;
+    jb)          jb --version 2>&1 | head -1 ;;
+    jrsonnet)    jrsonnet --version | head -1 ;;
+    tk)          tk --version 2>&1 | sed 's/.*tk version //' ;;
+    helm)        helm version --short ;;
+    kustomize)   kustomize version ;;
+    kubectl)     kubectl version --client 2>/dev/null | head -1 ;;
+    kubeconform) kubeconform -v ;;
+    cue)         cue version | head -1 ;;
+    timoni)      timoni version --client 2>/dev/null || timoni version ;;
+    kluctl)      kluctl version 2>&1 | head -1 ;;
+    ytt)         ytt version ;;
+    kcl)         kcl version ;;
+    sops)        sops --version 2>&1 | head -1 ;;
+    age)         age --version ;;
+    vals)        vals version ;;
+    yq)          yq --version ;;
+    jq)          jq --version ;;
+    just)        just --version ;;
+  esac
+done

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+printf "Kapitan version: "
+kapitan --version
+
+echo "Building kapitan targets from ${SOURCE_PATH} to ${BUILD_PATH} ..."
+cd ${SOURCE_PATH}; kapitan compile --reveal --use-go-jsonnet --output-path ${BUILD_PATH} --search-paths '.' './vendor' --parallelism 8

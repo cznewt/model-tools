@@ -1,0 +1,53 @@
+name: Build model-tools
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - docker/**
+      - VERSION
+  push:
+    branches: ["main"]
+    paths:
+      - docker/**
+      - VERSION
+      - .github/workflows/**
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  build-model-tools:
+    name: "Build model-tools"
+    uses: ./.github/workflows/docker-publish.yml
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    secrets: inherit
+    with:
+      APP_NAME: model-tools
+      APP_DIR: docker
+
+  smoke:
+    name: "Smoke test"
+    needs: build-model-tools
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ghcr.io/cznewt/model-tools:latest
+      options: --user root
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Tool versions
+        run: version
+      - name: Every tool answers
+        run: |
+          set -e
+          for t in kapitan jsonnet jb tk helm kustomize kubectl kubeconform cue timoni kluctl ytt kcl sops age vals yq jq just fish; do command -v "$t" >/dev/null || { echo "missing $t"; exit 1; }; done
+          echo '{a: 1}' | cue export - >/dev/null && echo 'x: {y: 1}' | yq '.x.y' && jsonnet -e '{a: 1}' >/dev/null && echo ok

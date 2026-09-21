@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import yaml
+import glob
+import datetime
+import os
+#from pytablewriter import MarkdownTableWriter, HtmlTableWriter
+import logging
+import markdown
+
+SOURCE_PATH = os.environ.get("SOURCE_PATH")
+BUILD_PATH = os.environ.get("BUILD_PATH")
+
+logging.basicConfig(
+    format="%(asctime)s [%(levelname)-5.5s]  %(message)s",
+    level=logging.INFO,
+    handlers=[logging.StreamHandler()],
+)
+
+print(f"Generating Kapitan component documentation at {SOURCE_PATH} ...")
+
+def load_config(file):
+    with open(file) as f:
+        try:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+        except AttributeError:
+            data = yaml.load(f)
+    return data
+
+config = load_config(f'{SOURCE_PATH}/doc.json')
+
+lines = [
+    '## Application Catalog',
+    ''
+]
+
+data = {}
+
+title_map = {
+    'base': 'Base Services',
+    'cicd': 'CI/CD Services',
+    'content': 'Content Servers',
+    'game': 'Gaming Services',
+    'iot': 'IoT Services',
+    'media': 'Multimedia Services',
+    'monitoring': 'Monitoring Services',
+    'misc': 'Miscellaneous Services',
+    'platform': 'Kubernetes Platform Services'
+}
+
+for key, item in config.items():
+    if not 'tags' in item:
+        print(item)
+        exit
+    if not item['tags'][0] in data:
+        data[item['tags'][0]] = []
+    if 'description' in item:
+        data[item['tags'][0]].append(' - **' + item['name'] + '**: ' + item['description'].replace('\n', ' ').strip())
+    else:
+        data[item['tags'][0]].append(' - **' + item['name'] + '**')
+
+for key, item in data.items():
+    lines.append('### ' + title_map[key])
+    lines.append('')
+    lines.append('\n'.join(item))
+    lines.append('')
+
+#output = markdown.markdown('\n'.join(lines))
+output = '\n'.join(lines)
+
+with open(f'{SOURCE_PATH}/doc/_catalog.md', "w") as f:
+    f.write(output)

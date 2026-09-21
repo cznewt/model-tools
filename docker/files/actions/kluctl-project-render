@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo "Rendering kluctl project ${SOURCE_TARGET} from ${SOURCE_PATH} to ${BUILD_PATH}..."
+cd ${SOURCE_PATH}; kluctl render ${BUILD_PATH}

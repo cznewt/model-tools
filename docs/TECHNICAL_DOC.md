@@ -1,0 +1,11 @@
+# Technical documentation
+
+Two-stage Dockerfile on `ubuntu:24.04`: the `downloader` stage installs kapitan into a venv and
+downloads every release binary for `TARGETARCH` (amd64 or arm64; jrsonnet and just use their own
+architecture spelling, derived in a `case`), the final stage copies the venv and binaries and
+installs the runtime packages (git, ssh, curl, libmagic for kapitan, fish for mxc recipes).
+
+`docker/versions.env` is the single list of tool versions; the justfile and the workflow turn it
+into `--build-arg`s. `VERSION` is the image tag. `.github/workflows/build-model-tools.yml` runs on
+pushes to `main` touching `docker/**` or `VERSION` and on manual dispatch: buildx with QEMU for
+arm64, GHA cache, push to ghcr.io, cosign signature.
