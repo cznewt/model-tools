@@ -34,7 +34,7 @@ servers for Jsonnet, YAML, JSON and shell, fish terminal) with the `notebooks/` 
 | `cue/` | CUE from scratch: values, types and constraints; importing YAML and validating rendered manifests with `cue vet`; contexts and `cue cmd` rendering in the companion repo; Timoni modules and bundles; the mxc fleet model |
 | `helm/` | chart anatomy from `helm create`, values layering and `values.schema.json`, dependencies and OCI, lint, kubeconform, environment diffs and secrets through vals |
 | `kustomize/` | bases and overlays with `kustomize edit`, strategic merge and JSON patches, generators, components and replacements, Helm charts inside Kustomize, validation |
-| `other-renderers/` | ytt data values and overlays, KCL schemas with `kcl vet` and `kcl test`, a Kluctl project with targets and Jinja2 |
+| `other-renderers/` | ytt data values and overlays, KCL schemas with `kcl vet` and `kcl test` ending on the companion repo's KCL renderer, a Kluctl project with targets and Jinja2 |
 
 ```sh
 docker compose up            # http://localhost:8888, token in the log; ./work is persistent
