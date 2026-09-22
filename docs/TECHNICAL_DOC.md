@@ -9,3 +9,10 @@ installs the runtime packages (git, ssh, curl, libmagic for kapitan, fish for mx
 into `--build-arg`s. `VERSION` is the image tag. `.github/workflows/build-model-tools.yml` runs on
 pushes to `main` touching `docker/**` or `VERSION` and on manual dispatch: buildx with QEMU for
 arm64, GHA cache, push to ghcr.io, cosign signature.
+
+## Notebooks
+
+`notebooks/<track>/*.ipynb` use the bash kernel; every cell is a shell command so the same steps
+work in a terminal. CI stages the tree into the Jupyter overlay; `just test-notebooks` executes every
+notebook with papermill inside the overlay image (network required: the tracks clone
+gitops-renderers and kapitan-reference into `/source/work`).

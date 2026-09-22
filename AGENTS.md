@@ -7,4 +7,5 @@
 - Verify a bump with `just build && just versions` before pushing. Release assets change naming
   between versions (go-jsonnet did in 0.22, jrsonnet moved to deltarocks); check the URL resolves.
 - Keep the image root-runnable and rootless-friendly: consumers run it with `--user $(id -u)`.
+- Notebooks are tests: after editing `notebooks/`, run `just test-notebooks <track>` (network needed) before pushing; CI executes all of them after the image build. Keep cells idempotent and cluster-free (no `tk env set`, `tk diff`, `kubectl apply`).
 - No em dashes in prose.

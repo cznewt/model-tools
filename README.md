@@ -24,9 +24,13 @@ docker run --rm -v "$PWD":/work -w /work ghcr.io/cznewt/model-tools:latest kusto
 
 `ghcr.io/cznewt/jupyter-model-tools` is JupyterLab on top of the base image (bash kernel, language
 servers for Jsonnet, YAML, JSON and shell, fish terminal) with the `notebooks/` tree seeded into
-`/source/notebooks` on first start: a guided walk through Kustomize, Helm, Tanka, Kapitan, CUE and
-Timoni, secrets patterns and the cross-renderer comparison, all against the
-[gitops-renderers](https://github.com/cznewt/gitops-renderers) repository.
+`/source/notebooks` on first start:
+
+| Folder | Notebooks |
+|---|---|
+| `introduction/` | the talk's walk through Kustomize, Helm, Tanka, Kapitan, CUE and Timoni, secrets patterns and the cross-renderer comparison, against [gitops-renderers](https://github.com/cznewt/gitops-renderers) |
+| `jsonnet-tanka/` | a Tanka project from `tk init`: environments, jsonnet-bundler and k8s-libsonnet, Helm charts and Kustomize inside Tanka, inline environments, linting and testing |
+| `jsonnet-kapitan/` | the official [kapitan-reference](https://github.com/kapicorp/kapitan-reference) setup: inventory and classes, the Kubernetes generator, refs and secrets, jinja2 scripts and docs, validation and testing |
 
 ```sh
 docker compose up            # http://localhost:8888, token in the log; ./work is persistent
@@ -35,6 +39,10 @@ helm install lab oci://ghcr.io/cznewt/charts/jupyter-model-tools --set persisten
 
 Layout follows monitor-tools: `extra/jupyter-model-tools/docker` (overlay image),
 `notebooks/` (baked in by CI), `charts/jupyter-model-tools` (published to `oci://ghcr.io/cznewt/charts`).
+
+Tests: `just test-notebooks [track]` executes the notebooks with papermill inside the overlay
+(every cell is a shell command, so a failing command fails the notebook); CI runs the same after
+each image build, and the smoke job checks that every tool in the base image answers.
 
 ## Releasing
 

@@ -67,3 +67,36 @@ jobs:
           set -e
           for t in kapitan jsonnet jb tk helm kustomize kubectl kubeconform cue timoni kluctl ytt kcl sops age vals yq jq just fish; do command -v "$t" >/dev/null || { echo "missing $t"; exit 1; }; done
           echo '{a: 1}' | cue export - >/dev/null && echo 'x: {y: 1}' | yq '.x.y' && jsonnet -e '{a: 1}' >/dev/null && echo ok
+
+  test-notebooks:
+    name: "Test notebooks"
+    needs: build-jupyter-model-tools
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ghcr.io/cznewt/jupyter-model-tools:latest
+      options: --user root
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      HOME: /tmp
+    steps:
+      - uses: actions/checkout@v4
+      - name: Execute every notebook with papermill
+        run: |
+          set -e
+          mkdir -p /source/work /tmp/out
+          for nb in $(find notebooks -name '*.ipynb' | sort); do
+            echo "== $nb"
+            papermill --cwd /source/work "$nb" "/tmp/out/$(basename "$nb")" -k bash --log-output >/dev/null
+          done
+          echo "all notebooks ran"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: executed-notebooks
+          path: /tmp/out
