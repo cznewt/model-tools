@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Validate rendered manifests against the Kubernetes schemas and the CRD catalog.
+#
+#   BUILD_PATH        directory of rendered YAML (default: ./build)
+#   KUBERNETES_VERSION optional, for example 1.33.0
+#   CRD_SCHEMAS       optional schema location, defaults to the datree CRD catalog
+source /actions/_common
+
+announce "kubeconform $(kubeconform -v): validating ${BUILD_PATH}"
+version_args=""
+[ -n "${KUBERNETES_VERSION:-}" ] && version_args="--kubernetes-version ${KUBERNETES_VERSION}"
+# the braces of the template must not go through ${VAR:-default}: bash ends the
+# expansion at the first closing brace and the schema URL loses its tail
+crds="${CRD_SCHEMAS:-}"
+if [ -z "${crds}" ]; then
+  crds='https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+fi
+
+# shellcheck disable=SC2086
+find "${BUILD_PATH}" \( -name '*.yaml' -o -name '*.yml' \) -print0 | sort -z | xargs -0 -r \
+  kubeconform -strict -ignore-missing-schemas -summary ${version_args} \
+    -schema-location default -schema-location "${crds}"

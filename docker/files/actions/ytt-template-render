@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Render ytt templates with data values and overlays.
+#
+#   YTT_FILES      space separated files or directories passed as -f
+#   YTT_VALUES     optional, space separated key=value pairs passed as -v
+#   SOURCE_TARGET  optional, name of the output file (default: ytt)
+source /actions/_common
+require YTT_FILES
+
+announce "ytt $(ytt version | sed 's/ytt version //'): rendering ${YTT_FILES}"
+prepare_build_path
+
+file_args=""
+for f in ${YTT_FILES}; do file_args="${file_args} -f ${f}"; done
+value_args=""
+for v in ${YTT_VALUES:-}; do value_args="${value_args} -v ${v}"; done
+# shellcheck disable=SC2086
+ytt ${file_args} ${value_args} | emit "${SOURCE_TARGET:-ytt}"

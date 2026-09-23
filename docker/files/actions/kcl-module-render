@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Run a KCL entry point with options and write the manifest stream.
+#
+#   SOURCE_PATH    module directory (holds kcl.mod)
+#   KCL_ENTRY      entry file, for example main.k (default: .)
+#   KCL_OPTIONS    optional, space separated key=value pairs passed as -D
+#   SOURCE_TARGET  optional, name of the output file
+source /actions/_common
+
+entry="${KCL_ENTRY:-.}"
+announce "kcl $(kcl version | head -1): running ${entry}"
+prepare_build_path
+cd "${SOURCE_PATH}"
+
+opt_args=""
+for opt in ${KCL_OPTIONS:-}; do opt_args="${opt_args} -D ${opt}"; done
+# shellcheck disable=SC2086
+kcl run "${entry}" ${opt_args} | emit "${SOURCE_TARGET:-$(basename "${entry}" .k)}"

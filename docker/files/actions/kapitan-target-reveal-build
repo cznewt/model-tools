@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Compile one Kapitan target with its refs revealed.
 
 printf "Kapitan version: "
 kapitan --version

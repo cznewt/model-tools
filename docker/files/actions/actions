@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# List the actions in this image with their variables.
+echo "model-tools actions, each reads SOURCE_PATH, BUILD_PATH and SOURCE_TARGET:"
+echo
+for a in /actions/*; do
+  name="$(basename "$a")"
+  case "$name" in _*|actions) continue ;; esac
+  desc="$(sed -n '2s/^# //p' "$a")"
+  printf "  %-28s %s\n" "$name" "${desc:-}"
+done
+echo
+echo "Variables per action: sed -n '2,12p' /actions/<name>   Tool versions: version"

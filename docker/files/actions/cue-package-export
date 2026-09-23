@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Validate and export a CUE package.
+#
+#   SOURCE_PATH     module directory (holds cue.mod)
+#   CUE_PACKAGE     package path to evaluate, for example ./web (default: .)
+#   CUE_EXPRESSION  optional, -e expression to export
+#   SOURCE_TARGET   optional, name of the output file (default: the expression or package)
+source /actions/_common
+
+package="${CUE_PACKAGE:-.}"
+announce "cue $(cue version | head -1 | sed 's/cue version //'): vetting and exporting ${package}"
+prepare_build_path
+cd "${SOURCE_PATH}"
+
+cue vet "${package}"
+name="${SOURCE_TARGET:-$(basename "${CUE_EXPRESSION:-${package}}")}"
+if [ -n "${CUE_EXPRESSION:-}" ]; then
+  cue export "${package}" -e "${CUE_EXPRESSION}" --out yaml | emit "${name}"
+else
+  cue export "${package}" --out yaml | emit "${name}"
+fi

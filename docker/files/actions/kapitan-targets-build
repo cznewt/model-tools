@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Compile every Kapitan target in the inventory.
 
 printf "Kapitan version: "
 kapitan --version

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Print the resolved Kapitan inventory.
 
 echo "Building kapitan inventory from ${SOURCE_PATH}..."
 cd ${SOURCE_PATH}; kapitan inventory

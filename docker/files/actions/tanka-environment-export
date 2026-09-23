@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Export a Tanka environment to YAML. Vendors jsonnet libraries and charts first.
+#
+#   SOURCE_PATH    Tanka project root (holds jsonnetfile.json)
+#   SOURCE_TARGET  environment path, for example environments/web/prod
+#   TANKA_NAME     optional, --name for inline environments
+source /actions/_common
+require SOURCE_TARGET
+
+announce "tanka $(tk --version 2>&1 | sed 's/.*tk version //'): exporting ${SOURCE_TARGET}"
+prepare_build_path
+cd "${SOURCE_PATH}"
+
+[ -f jsonnetfile.json ] && jb install >/dev/null
+[ -f chartfile.yaml ] && tk tool charts vendor >/dev/null
+
+name_args=""
+[ -n "${TANKA_NAME:-}" ] && name_args="--name ${TANKA_NAME}"
+tmp="$(mktemp -d)"
+# shellcheck disable=SC2086
+tk export "${tmp}" "${SOURCE_TARGET}" ${name_args} \
+  --format '{{.kind}}-{{.metadata.name}}' >/dev/null
+
+{ for f in $(find "${tmp}" -name '*.yaml' | sort); do echo '---'; cat "${f}"; done; } \
+  | emit "$(basename "${SOURCE_TARGET}")"
+rm -rf "${tmp}"

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Build a Kustomize overlay, Helm chart generators included.
+#
+#   SOURCE_PATH    directory holding kustomization.yaml
+#   SOURCE_TARGET  optional, name of the output file (default: the directory name)
+#   KUSTOMIZE_ARGS optional, extra flags for kustomize build
+source /actions/_common
+
+name="${SOURCE_TARGET:-$(basename "${SOURCE_PATH}")}"
+announce "kustomize $(kustomize version): building ${SOURCE_PATH}"
+prepare_build_path
+
+# shellcheck disable=SC2086
+kustomize build --enable-helm ${KUSTOMIZE_ARGS:-} "${SOURCE_PATH}" | emit "${name}"

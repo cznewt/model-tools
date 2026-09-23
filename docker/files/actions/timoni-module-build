@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Build a Timoni module instance, local path or OCI URL.
+#
+#   SOURCE_PATH    module directory or oci:// URL
+#   SOURCE_TARGET  instance name
+#   VALUES_FILES   optional, space separated values files
+#   NAMESPACE      optional, defaults to the instance name
+source /actions/_common
+require SOURCE_TARGET
+
+announce "timoni $(timoni version 2>/dev/null | sed -n 's/^client: //p'): building ${SOURCE_TARGET}"
+prepare_build_path
+
+values_args=""
+for f in ${VALUES_FILES:-}; do values_args="${values_args} -f ${f}"; done
+# shellcheck disable=SC2086
+timoni build "${SOURCE_TARGET}" "${SOURCE_PATH}" \
+  --namespace "${NAMESPACE:-${SOURCE_TARGET}}" ${values_args} | emit "${SOURCE_TARGET}"

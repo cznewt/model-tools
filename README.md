@@ -8,6 +8,7 @@ for amd64 and arm64 and published as `ghcr.io/cznewt/model-tools:<version>` (see
 | kapitan, jsonnet, jsonnetfmt, jsonnet-lint, jb, jrsonnet, tk | Jsonnet: Kapitan inventory compiles, Tanka environments, jsonnet-bundler |
 | helm, kustomize, kubectl, kubeconform | Helm charts, Kustomize overlays, server-side dry runs, schema validation |
 | cue, timoni, kcl, ytt, kluctl | CUE packages and Timoni modules, KCL, ytt, Kluctl deployments |
+| flux, argocd, argo | GitOps engine clients: Flux, Argo CD and Argo Workflows, for reconciling and inspecting what the renderers produced |
 | sops, age, vals | Secrets in Git (SOPS + age), secret references (`ref+vault://`, `ref+sops://`, ...) |
 | yq, jq, just, fish | Glue (fish because mxc's just recipes use it) |
 
@@ -16,15 +17,40 @@ docker run --rm ghcr.io/cznewt/model-tools:latest version      # every tool vers
 docker run --rm -v "$PWD":/work -w /work ghcr.io/cznewt/model-tools:latest kustomize build overlays/prod
 ```
 
-`/actions` holds the Kapitan helpers used by the service catalogs (`kapitan-target-build`,
-`kapitan-targets-build`, `kapitan-inventory-build`, `kapitan-doc-build`, `kluctl-project-render`,
-`version`). Companion examples: [cznewt/gitops-renderers](https://github.com/cznewt/gitops-renderers).
+## Actions
+
+`/actions` gives every renderer the same shape: point a script at a project, name a target, get
+YAML in `BUILD_PATH`. `actions` lists them, `version` prints the tool versions, and
+[docs/ACTIONS.md](docs/ACTIONS.md) documents the variables.
+
+| Renderer | Action |
+|---|---|
+| Helm | `helm-chart-render` |
+| Kustomize | `kustomize-overlay-render` |
+| Jsonnet, Tanka | `tanka-environment-export` |
+| Jsonnet, Kapitan | `kapitan-target-build`, `kapitan-targets-build`, the `-reveal-` variants, `kapitan-inventory-build`, `kapitan-doc-build` |
+| CUE | `cue-package-export` |
+| Timoni | `timoni-module-build` |
+| KCL | `kcl-module-render` |
+| ytt | `ytt-template-render` |
+| Kluctl | `kluctl-project-render` |
+| any | `manifests-validate` (kubeconform with the CRD catalog) |
+
+```sh
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/work -w /work -e HOME=/tmp \
+  -e SOURCE_PATH=examples/02-helm/web -e SOURCE_TARGET=web -e BUILD_PATH=rendered \
+  ghcr.io/cznewt/model-tools:latest helm-chart-render
+```
+
+Companion examples: [cznewt/gitops-renderers](https://github.com/cznewt/gitops-renderers).
 
 ## Jupyter overlay
 
 `ghcr.io/cznewt/jupyter-model-tools` is JupyterLab on top of the base image (bash kernel, language
 servers for Jsonnet, YAML, JSON and shell, fish terminal) with the `notebooks/` tree seeded into
-`/source/notebooks` on first start:
+`/source/notebooks` on first start. Open `00-start-here.ipynb`: it is a signpost of cards, one per
+track, and each track has its own `00-index.ipynb` with a card per notebook and the track's
+exercises collected at the bottom.
 
 | Folder | Notebooks |
 |---|---|
@@ -34,7 +60,9 @@ servers for Jsonnet, YAML, JSON and shell, fish terminal) with the `notebooks/` 
 | `cue/` | CUE from scratch: values, types and constraints; importing YAML and validating rendered manifests with `cue vet`; contexts and `cue cmd` rendering in the companion repo; Timoni modules and bundles; the mxc fleet model |
 | `helm/` | chart anatomy from `helm create`, values layering and `values.schema.json`, dependencies and OCI, lint, kubeconform, environment diffs and secrets through vals |
 | `kustomize/` | bases and overlays with `kustomize edit`, strategic merge and JSON patches, generators, components and replacements, Helm charts inside Kustomize, validation |
-| `other-renderers/` | ytt data values and overlays, KCL schemas with `kcl vet` and `kcl test` ending on the companion repo's KCL renderer, a Kluctl project with targets and Jinja2 |
+| `ytt/` | Carvel's ytt: data values, Starlark annotations, overlays that patch by matching YAML nodes |
+| `kcl/` | KCL schemas with `check:` rules, `kcl vet` and `kcl test`, ending on the companion repo's KCL renderer |
+| `kluctl/` | a Kluctl project: targets, Jinja2 templating over Kustomize, offline rendering |
 
 ```sh
 docker compose up            # http://localhost:8888, token in the log; ./work is persistent

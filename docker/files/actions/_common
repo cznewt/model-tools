@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Shared helpers for the render actions. Sourced, never run on its own.
+#
+# Every action reads the same three variables:
+#   SOURCE_PATH    the project directory to render (default: the working directory)
+#   BUILD_PATH     where the rendered YAML is written (default: ./build)
+#   SOURCE_TARGET  which environment, target, release or instance to render
+#
+# Tool-specific variables are listed in each action and in docs/ACTIONS.md.
+
+set -euo pipefail
+
+SOURCE_PATH="${SOURCE_PATH:-$PWD}"
+BUILD_PATH="${BUILD_PATH:-$PWD/build}"
+
+require() {
+  local missing=0
+  for var in "$@"; do
+    if [ -z "${!var:-}" ]; then echo "error: $var is required" >&2; missing=1; fi
+  done
+  [ "$missing" -eq 0 ] || { echo "see: actions" >&2; exit 2; }
+}
+
+announce() { echo "==> $*"; }
+
+prepare_build_path() { mkdir -p "${BUILD_PATH}"; }
+
+# Write a stream to BUILD_PATH/<name>.yaml and report what came out.
+emit() {
+  local name="$1"
+  local out="${BUILD_PATH}/${name}.yaml"
+  cat > "${out}"
+  echo "    ${out} ($(grep -c '^kind:' "${out}" || true) objects)"
+}

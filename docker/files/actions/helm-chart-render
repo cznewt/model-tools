@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Render a Helm chart with values, without a cluster.
+#
+#   SOURCE_PATH    chart directory (or a packaged chart)
+#   SOURCE_TARGET  release name
+#   VALUES_FILES   optional, space separated values files
+#   NAMESPACE      optional, defaults to the release name
+#   HELM_ARGS      optional, extra flags for helm template
+source /actions/_common
+require SOURCE_TARGET
+
+announce "helm $(helm version --short): rendering ${SOURCE_PATH} as ${SOURCE_TARGET}"
+prepare_build_path
+
+values_args=""
+for f in ${VALUES_FILES:-}; do values_args="${values_args} -f ${f}"; done
+
+helm dependency update "${SOURCE_PATH}" >/dev/null 2>&1 || true
+# shellcheck disable=SC2086
+helm template "${SOURCE_TARGET}" "${SOURCE_PATH}" \
+  --namespace "${NAMESPACE:-${SOURCE_TARGET}}" \
+  --skip-tests ${values_args} ${HELM_ARGS:-} | emit "${SOURCE_TARGET}"

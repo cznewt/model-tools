@@ -21,6 +21,10 @@ build-jupyter:
     rm -rf extra/jupyter-model-tools/docker/files/notebooks && mkdir -p extra/jupyter-model-tools/docker/files/notebooks && cp -r notebooks/. extra/jupyter-model-tools/docker/files/notebooks/
     docker build --build-arg MODEL_TOOLS_VERSION={{version}} -t ghcr.io/cznewt/jupyter-model-tools:{{version}} -t ghcr.io/cznewt/jupyter-model-tools:latest extra/jupyter-model-tools/docker/
 
+[doc('Regenerate the signpost notebooks (root cards and per-track indexes with exercises).')]
+signposts:
+    python3 scripts/generate_signposts.py
+
 [doc('Execute every notebook with papermill inside the Jupyter overlay (needs network).')]
 test-notebooks track="":
     mkdir -p .build/work .build/out && chmod 777 .build/work .build/out

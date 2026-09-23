@@ -1,6 +1,7 @@
 #!/bin/bash
+# Print the version of every tool in this image.
 
-for tool in kapitan jsonnet jsonnetfmt jb jrsonnet tk helm kustomize kubectl kubeconform cue timoni kluctl ytt kcl sops age vals yq jq just; do
+for tool in kapitan jsonnet jsonnetfmt jb jrsonnet tk helm kustomize kubectl kubeconform cue timoni kluctl ytt kcl flux argocd argo sops age vals yq jq just; do
   printf "%-12s " "$tool"
   case "$tool" in
     kapitan)     kapitan --version ;;
@@ -24,5 +25,8 @@ for tool in kapitan jsonnet jsonnetfmt jb jrsonnet tk helm kustomize kubectl kub
     yq)          yq --version ;;
     jq)          jq --version ;;
     just)        just --version ;;
+    flux)        flux --version ;;
+    argocd)      argocd version --client --short 2>/dev/null | head -1 ;;
+    argo)        argo version --short 2>/dev/null | head -1 ;;
   esac
 done

@@ -101,11 +101,23 @@ RUN case "${PKG_ARCH}" in amd64) A=x86_64 ;; arm64) A=aarch64 ;; esac \
     && wget -q https://github.com/casey/just/releases/download/${JUST_VERSION}/just-${JUST_VERSION}-${A}-unknown-linux-musl.tar.gz \
     && tar -zxf just-${JUST_VERSION}-${A}-unknown-linux-musl.tar.gz just && chmod +x just
 
+# GitOps engine clients: reconcile, diff and inspect what the renderers produced
+ARG FLUX_VERSION
+RUN wget -q https://github.com/fluxcd/flux2/releases/download/v${FLUX_VERSION}/flux_${FLUX_VERSION}_linux_${PKG_ARCH}.tar.gz \
+    && tar -zxf flux_${FLUX_VERSION}_linux_${PKG_ARCH}.tar.gz flux && chmod +x flux
+
+ARG ARGOCD_VERSION
+RUN wget -q -O argocd https://github.com/argoproj/argo-cd/releases/download/v${ARGOCD_VERSION}/argocd-linux-${PKG_ARCH} && chmod +x argocd
+
+ARG ARGO_WORKFLOWS_VERSION
+RUN wget -q -O argo.gz https://github.com/argoproj/argo-workflows/releases/download/v${ARGO_WORKFLOWS_VERSION}/argo-linux-${PKG_ARCH}.gz \
+    && gunzip -f argo.gz && chmod +x argo
+
 FROM ubuntu:${UBUNTU_VERSION}
 
 COPY --from=downloader /opt/venv /opt/venv
 COPY --from=downloader /root/jsonnet /root/jsonnetfmt /root/jsonnet-lint /root/jsonnet-deps /usr/local/bin/
-COPY --from=downloader /root/jb /root/jrsonnet /root/tk /root/ytt /root/yq /root/jq /root/kluctl /root/kcl /root/cue /root/sops /root/vals /root/kustomize /root/kubectl /root/kubeconform /root/timoni /root/just /root/helm /usr/local/bin/
+COPY --from=downloader /root/jb /root/jrsonnet /root/tk /root/ytt /root/yq /root/jq /root/kluctl /root/kcl /root/cue /root/sops /root/vals /root/kustomize /root/kubectl /root/kubeconform /root/timoni /root/just /root/helm /root/flux /root/argocd /root/argo /usr/local/bin/
 COPY --from=downloader /root/age/age /root/age/age-keygen /usr/local/bin/
 
 ENV PATH="/opt/venv/bin:${PATH}"
